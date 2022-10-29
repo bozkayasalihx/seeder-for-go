@@ -211,7 +211,7 @@ func main() {
 	faker := faker.New()
 
 	for i := 0; i < 100; i++ {
-		// userType := RandomUserType()
+		userType := RandomUserType()
 
 		randomId := randomId(100)
 
@@ -225,58 +225,58 @@ func main() {
 		dsCode := genCode(faker)
 		addData(dsCode, "dscode")
 
-		// data, _ := getData("vcode")
-		// data2, _ := getData("dscode")
+		data, _ := getData("vcode")
+		data2, _ := getData("dscode")
 
-		// user := CreateUser(faker, userType)
-		// userOut, err := helper(user, "/register", token)
-		// if err != nil {
-		// 	panic(err.Error())
-		// }
-		// vendor := CreateVendor(faker, faker.Lorem().Word())
-		// venOut, err := helper(vendor, "/vendor/create-vendor", token)
-		// if err != nil {
-		// 	panic(err.Error())
-		// }
+		user := CreateUser(faker, userType)
+		userOut, err := helper(user, "/register", token)
+		if err != nil {
+			panic(err.Error())
+		}
+		vendor := CreateVendor(faker, faker.Lorem().Word())
+		venOut, err := helper(vendor, "/vendor/create-vendor", token)
+		if err != nil {
+			panic(err.Error())
+		}
 
-		// buyer := CreateDealerAndBuyer(faker)
-		// buyerOut, err := helper(buyer, "/buyer/create-buyer", token)
+		buyer := CreateDealerAndBuyer(faker)
+		buyerOut, err := helper(buyer, "/buyer/create-buyer", token)
 
-		// if err != nil {
-		// 	panic(err.Error())
-		// }
+		if err != nil {
+			panic(err.Error())
+		}
 
-		// dealer := CreateDealerAndBuyer(faker)
-		// dealerOut, err := helper(dealer, "/dealer/create-dealer", token)
+		dealer := CreateDealerAndBuyer(faker)
+		dealerOut, err := helper(dealer, "/dealer/create-dealer", token)
 
-		// if err != nil {
-		// 	panic(err.Error())
-		// }
+		if err != nil {
+			panic(err.Error())
+		}
 
-		// dealerSite := CreateDealerSite(faker, randomId, data[randomId], data2[randomId])
-		// dealerSiteOut, err := helper(dealerSite, "/dealer-site/create-dealersite", token)
-		// if err != nil {
-		// 	panic(err.Error())
-		// }
+		dealerSite := CreateDealerSite(faker, randomId, data[randomId], data2[randomId])
+		dealerSiteOut, err := helper(dealerSite, "/dealer-site/create-dealersite", token)
+		if err != nil {
+			panic(err.Error())
+		}
 
-		// buyerSite := CreateBuyerSite(faker, randomId, data[randomId], data2[randomId])
-		// buyerSiteOut, err := helper(buyerSite, "/buyer-site/create-buyersite", token)
+		buyerSite := CreateBuyerSite(faker, randomId, data[randomId], data2[randomId])
+		buyerSiteOut, err := helper(buyerSite, "/buyer-site/create-buyersite", token)
 
-		// if err != nil {
-		// 	panic(err.Error())
-		// }
+		if err != nil {
+			panic(err.Error())
+		}
 
-		// vds := CreateVds(randomId, randomId)
-		// vdsOut, err := helper(vds, "/relations/vds-relations", token)
-		// if err != nil {
-		// 	panic(err.Error())
-		// }
+		vds := CreateVds(randomId, randomId)
+		vdsOut, err := helper(vds, "/relations/vds-relations", token)
+		if err != nil {
+			panic(err.Error())
+		}
 
-		// vdsbs := CreateVdsbs(randomId, randomId)
-		// vdsbsOut, err := helper(vdsbs, "/relations/vdsbs-relations", token)
-		// if err != nil {
-		// 	panic(err.Error())
-		// }
+		vdsbs := CreateVdsbs(randomId, randomId)
+		vdsbsOut, err := helper(vdsbs, "/relations/vdsbs-relations", token)
+		if err != nil {
+			panic(err.Error())
+		}
 
 		userEntity := CreateUserEntity(faker, randomId)
 		// fmt.Println(userEntity)
@@ -285,14 +285,14 @@ func main() {
 			panic(err.Error())
 		}
 
-		// fmt.Println(userOut)
-		// fmt.Println(venOut)
-		// fmt.Println(buyerOut)
-		// fmt.Println(dealerOut)
-		// fmt.Println(dealerSiteOut)
-		// fmt.Println(buyerSiteOut)
-		// fmt.Println(vdsOut)
-		// fmt.Println(vdsbsOut)
+		fmt.Println(userOut)
+		fmt.Println(venOut)
+		fmt.Println(buyerOut)
+		fmt.Println(dealerOut)
+		fmt.Println(dealerSiteOut)
+		fmt.Println(buyerSiteOut)
+		fmt.Println(vdsOut)
+		fmt.Println(vdsbsOut)
 		fmt.Println(userEntityOut)
 
 	}

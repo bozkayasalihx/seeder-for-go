@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"math/rand"
 	"net/http"
 	"reflect"
@@ -124,13 +124,6 @@ func CreateUserEntity(faker faker.Faker, randomid int) *UserEntity {
 	randomColumn.Set(reflect.ValueOf(strconv.Itoa(randomid)))
 	userEntity.UserId = strconv.Itoa(randomid)
 
-	j, err := json.Marshal(userEntity)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	fmt.Println(string(j))
-
 	return &userEntity
 
 }
@@ -162,17 +155,17 @@ func CreateVdsbs(vdsbsRandId int, bRandId int) *Vdsbs {
 }
 
 func genCode(faker faker.Faker) string {
-	return faker.Lorem().Word()
+	return faker.RandomStringWithLength(10)
 }
 
 func RandomUserType() string {
-	userType := []string{
-		"VA", "V", "B", "BA", "D", "DA", "SA",
-	}
-
+	userType := []string{"SA", "VA", "V", "B", "BA", "D", "DA"}
 	randomIndex := rand.Intn(len(userType))
 	return userType[randomIndex]
+}
 
+type ResponseType struct {
+	Message string `json:"message"`
 }
 
 func helper[T interface{}](obj T, route string, token string) (string, error) {
@@ -196,7 +189,7 @@ func helper[T interface{}](obj T, route string, token string) (string, error) {
 		return "", err
 	}
 
-	b, e := ioutil.ReadAll(resp.Body)
+	b, e := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", e
 	}
@@ -209,34 +202,38 @@ func helper[T interface{}](obj T, route string, token string) (string, error) {
 func main() {
 
 	faker := faker.New()
-
-	for i := 0; i < 100; i++ {
+	msg := "already exists"
+	for i := 0; i < 1000; i++ {
 		userType := RandomUserType()
+		randomid := randomId(200)
 
-		randomId := randomId(100)
-
-		token, err := genToken(randomId)
+		token, err := genToken(randomid)
 		if err != nil {
 			panic(err.Error())
 		}
-
 		vCode := genCode(faker)
-		addData(vCode, "vcode")
 		dsCode := genCode(faker)
-		addData(dsCode, "dscode")
-
-		data, _ := getData("vcode")
-		data2, _ := getData("dscode")
 
 		user := CreateUser(faker, userType)
+
 		userOut, err := helper(user, "/register", token)
 		if err != nil {
 			panic(err.Error())
 		}
-		vendor := CreateVendor(faker, faker.Lorem().Word())
+
+		isCUser := IsContains(userOut, msg)
+		if isCUser {
+			continue
+		}
+		vendor := CreateVendor(faker, vCode)
 		venOut, err := helper(vendor, "/vendor/create-vendor", token)
 		if err != nil {
 			panic(err.Error())
+		}
+
+		isCVendor := IsContains(venOut, msg)
+		if isCVendor {
+			continue
 		}
 
 		buyer := CreateDealerAndBuyer(faker)
@@ -244,6 +241,10 @@ func main() {
 
 		if err != nil {
 			panic(err.Error())
+		}
+		isCBuyer := IsContains(buyerOut, msg)
+		if isCBuyer {
+			continue
 		}
 
 		dealer := CreateDealerAndBuyer(faker)
@@ -253,48 +254,60 @@ func main() {
 			panic(err.Error())
 		}
 
-		dealerSite := CreateDealerSite(faker, randomId, data[randomId], data2[randomId])
-		dealerSiteOut, err := helper(dealerSite, "/dealer-site/create-dealersite", token)
-		if err != nil {
-			panic(err.Error())
-		}
+		isCDealer := IsContains(dealerOut, msg)
+		if !isCDealer {
+			dealerSite := CreateDealerSite(faker, randomid, vCode, dsCode)
+			dealerSiteOut, err := helper(dealerSite, "/dealer-site/create-dealersite", token)
+			if err != nil {
+				panic(err.Error())
+			}
+			isCDealerSite := IsContains(dealerSiteOut, msg)
 
-		buyerSite := CreateBuyerSite(faker, randomId, data[randomId], data2[randomId])
-		buyerSiteOut, err := helper(buyerSite, "/buyer-site/create-buyersite", token)
+			userEntity := CreateUserEntity(faker, randomid)
+			outUserEntity, err := helper(userEntity, "/relations/create-user-entity", token)
+			if err != nil {
+				panic(err.Error())
+			}
+			fmt.Println(dealerSiteOut)
+			fmt.Println(outUserEntity)
+			if !isCDealerSite {
 
-		if err != nil {
-			panic(err.Error())
-		}
+				buyerSite := CreateBuyerSite(faker, randomid, vCode, dsCode)
+				buyerSiteOut, err := helper(buyerSite, "/buyer-site/create-buyersite", token)
 
-		vds := CreateVds(randomId, randomId)
-		vdsOut, err := helper(vds, "/relations/vds-relations", token)
-		if err != nil {
-			panic(err.Error())
-		}
+				if err != nil {
+					panic(err.Error())
+				}
+				fmt.Println(buyerSiteOut)
+				isCBuyerSite := IsContains(buyerSiteOut, msg)
+				if !isCBuyerSite {
+					vds := CreateVds(randomid, randomid)
+					vdsOut, err := helper(vds, "/relations/vds-relations", token)
+					if err != nil {
+						panic(err.Error())
+					}
 
-		vdsbs := CreateVdsbs(randomId, randomId)
-		vdsbsOut, err := helper(vdsbs, "/relations/vdsbs-relations", token)
-		if err != nil {
-			panic(err.Error())
-		}
+					fmt.Println(vdsOut)
 
-		userEntity := CreateUserEntity(faker, randomId)
-		// fmt.Println(userEntity)
-		userEntityOut, err := helper(userEntity, "/relations/create-user-entity", token)
-		if err != nil {
-			panic(err.Error())
+					isCVds := IsContains(vdsOut, msg)
+					if !isCVds {
+						vdsbs := CreateVdsbs(randomid, randomid)
+						vdsbsOut, err := helper(vdsbs, "/relations/vdsbs-relations", token)
+						if err != nil {
+							panic(err.Error())
+						}
+
+						fmt.Println(vdsbsOut)
+					}
+
+				}
+			}
 		}
 
 		fmt.Println(userOut)
 		fmt.Println(venOut)
 		fmt.Println(buyerOut)
 		fmt.Println(dealerOut)
-		fmt.Println(dealerSiteOut)
-		fmt.Println(buyerSiteOut)
-		fmt.Println(vdsOut)
-		fmt.Println(vdsbsOut)
-		fmt.Println(userEntityOut)
-
 	}
 
 }

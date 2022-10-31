@@ -1,8 +1,0 @@
-version: "3.9"
-services:
-  rdb:
-    container_name: redis
-    image: redis:6-alpine
-    restart: always
-    ports:
-      - 6379:6379

@@ -7,7 +7,7 @@ import (
 )
 
 type Claims struct {
-	id int `json:"id"`
+	Id int `json:"id"`
 	jwt.StandardClaims
 }
 
@@ -16,7 +16,7 @@ func genToken(userId int) (string, error) {
 
 	expireDate := time.Now().Add(100 * time.Minute)
 	claims := &Claims{
-		id: userId,
+		Id: userId,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expireDate.Unix(),
 		},
